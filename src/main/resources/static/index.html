@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitKit — Daily Nutrition & Meal Journal</title>
+    <meta name="description" content="A calm, reliable daily nutrition journal and meal tracker with verified Indian food composition and cooking yield calculations.">
+    <!-- Google Fonts: Inter & Newsreader -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- AUTHENTICATION VIEW (Shown when unauthenticated) -->
+    <section class="auth-container" id="view-auth" style="display: none;">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="brand-badge" style="margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: var(--accent-primary); color: #FFFDF8; font-family: var(--font-serif); font-size: 18px; font-weight: 700;">FK</div>
+                <h2 class="auth-title" style="font-family: var(--font-serif); font-size: 24px; color: var(--text-primary); text-align: center; margin-bottom: 4px;">FitKit Nutrition Journal</h2>
+                <p class="auth-subtitle" style="font-size: 13px; color: var(--text-secondary); text-align: center; margin-bottom: 22px;">Calibrated daily nutrition tracking with verified Indian food composition.</p>
+            </div>
+
+            <!-- Auth Mode Tabs -->
+            <div class="auth-tabs" style="display: flex; border-bottom: 1px solid var(--border-subtle); margin-bottom: 20px;">
+                <button class="auth-tab-btn active" id="tab-btn-login" style="flex: 1; padding: 10px; background: none; border: none; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text-primary); border-bottom: 2px solid var(--accent-primary);">Sign In</button>
+                <button class="auth-tab-btn" id="tab-btn-register" style="flex: 1; padding: 10px; background: none; border: none; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--text-secondary); border-bottom: 2px solid transparent;">Create Account</button>
+            </div>
+
+            <!-- Error Alert Box -->
+            <div id="auth-alert-box" style="display: none; background-color: #FDF2E9; border: 1px solid #F5CBA7; color: var(--state-error); padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 16px;"></div>
+
+            <!-- Sign In Form -->
+            <form id="form-login">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label" for="login-email">Email Address</label>
+                    <input type="email" id="login-email" class="form-input" placeholder="name@example.com" required autocomplete="email">
+                </div>
+                <div class="form-group" style="margin-bottom: 18px;">
+                    <label class="form-label" for="login-password">Password</label>
+                    <input type="password" id="login-password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary" id="btn-submit-login" style="width: 100%; justify-content: center; padding: 11px; font-size: 14px;">Sign In to FitKit</button>
+                
+                <div style="margin-top: 14px; text-align: center;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-demo-fill" style="width: 100%;">Demo Login (demo@fitkit.local)</button>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="form-register" style="display: none;">
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label" for="register-name">Full Name</label>
+                    <input type="text" id="register-name" class="form-input" placeholder="e.g. Riya Sharma" required autocomplete="name">
+                </div>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label" for="register-email">Email Address</label>
+                    <input type="email" id="register-email" class="form-input" placeholder="name@example.com" required autocomplete="email">
+                </div>
+                <div class="form-group" style="margin-bottom: 18px;">
+                    <label class="form-label" for="register-password">Password (min 8 characters)</label>
+                    <input type="password" id="register-password" class="form-input" placeholder="••••••••" minlength="8" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn btn-primary" id="btn-submit-register" style="width: 100%; justify-content: center; padding: 11px; font-size: 14px;">Create Account</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- NUTRITION ONBOARDING (shown before any daily targets are displayed) -->
+    <section class="auth-container" id="view-nutrition-onboarding" style="display: none;">
+        <div class="auth-card" style="max-width: 620px; max-height: calc(100vh - 48px); overflow-y: auto;">
+            <div class="auth-header">
+                <div class="brand-badge" style="margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: var(--accent-primary); color: #FFFDF8; font-family: var(--font-serif); font-size: 18px; font-weight: 700;">FK</div>
+                <h2 class="auth-title" style="font-family: var(--font-serif); font-size: 24px; color: var(--text-primary); text-align: center; margin-bottom: 4px;">Set up your nutrition targets</h2>
+                <p class="auth-subtitle" style="font-size: 13px; color: var(--text-secondary); text-align: center; margin-bottom: 18px;">Answer a few questions so FitKit can estimate targets for you. You can adjust them later in Settings.</p>
+            </div>
+            <div id="onboarding-alert" role="alert" style="display:none; background-color:#FDF2E9; border:1px solid #F5CBA7; color:var(--state-error); padding:10px 14px; border-radius:var(--radius-sm); font-size:13px; margin-bottom:16px;"></div>
+            <form id="nutrition-onboarding-form">
+                <div class="form-group"><label class="form-label" for="onboarding-age">Age</label><input id="onboarding-age" class="form-input" type="number" min="18" max="100" required><span class="form-hint">FitKit targets are currently designed for adults aged 18–100.</span></div>
+                <div class="form-group"><label class="form-label" for="onboarding-sex">Sex used for the estimate</label><select id="onboarding-sex" class="form-select" required><option value="">Choose one</option><option value="FEMALE">Female</option><option value="MALE">Male</option><option value="UNSPECIFIED">Prefer not to say</option></select><span class="form-hint">This affects the standard resting-energy equation. “Prefer not to say” uses the midpoint.</span></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <div class="form-group"><label class="form-label" for="onboarding-height">Height (cm)</label><input id="onboarding-height" class="form-input" type="number" min="120" max="230" step="1" required></div>
+                    <div class="form-group"><label class="form-label" for="onboarding-weight">Weight (kg)</label><input id="onboarding-weight" class="form-input" type="number" min="35" max="300" step="0.1" required></div>
+                </div>
+                <div class="form-group"><label class="form-label" for="onboarding-activity">Typical activity level</label><select id="onboarding-activity" class="form-select" required><option value="">Choose one</option><option value="SEDENTARY">Mostly seated, little planned exercise</option><option value="LIGHT">Light activity or exercise 1–3 days a week</option><option value="MODERATE">Moderate exercise 3–5 days a week</option><option value="HIGH">Hard exercise or physical work most days</option></select></div>
+                <div class="form-group"><label class="form-label" for="onboarding-goal">Your current goal</label><select id="onboarding-goal" class="form-select" required><option value="">Choose one</option><option value="LOSE">Lose weight gradually</option><option value="MAINTAIN">Maintain my weight</option><option value="GAIN">Gain weight gradually</option></select></div>
+                <p class="form-hint" style="margin: 8px 0 18px;">These are estimates for general tracking, not medical advice. If you are pregnant, under 18, managing a medical condition, or have a history of disordered eating, please get individualized guidance from a qualified health professional.</p>
+                <button type="submit" class="btn btn-primary" id="btn-save-nutrition-profile" style="width:100%;justify-content:center;padding:11px;font-size:14px;">Calculate my targets</button>
+            </form>
+            <div style="text-align:center;margin-top:12px;"><button type="button" class="btn btn-secondary btn-sm" id="btn-onboarding-logout">Sign out</button></div>
+        </div>
+    </section>
+
+    <!-- MAIN APPLICATION JOURNAL LAYOUT -->
+    <div class="app-layout" id="main-app-layout">
+
+        <!-- Sidebar Navigation (Desktop) -->
+        <aside class="app-sidebar">
+            <div class="sidebar-header">
+                <div class="brand-mark">FK</div>
+                <div class="brand-info">
+                    <h1>FitKit</h1>
+                    <span>Nutrition Journal</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <span class="nav-section-label">Tracking</span>
+                <a href="#overview" class="nav-item active" data-view="overview" id="nav-overview">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                    </svg>
+                    <span>Overview</span>
+                </a>
+                <a href="#diary" class="nav-item" data-view="diary" id="nav-diary">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        <line x1="9" y1="7" x2="15" y2="7"></line>
+                        <line x1="9" y1="11" x2="13" y2="11"></line>
+                    </svg>
+                    <span>Food Diary</span>
+                </a>
+
+                <span class="nav-section-label">Knowledge</span>
+                <a href="#library" class="nav-item" data-view="library" id="nav-library">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                    <span>Food Library</span>
+                </a>
+                <a href="#recipes" class="nav-item" data-view="recipes" id="nav-recipes">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"></path>
+                        <line x1="6" y1="17" x2="18" y2="17"></line>
+                    </svg>
+                    <span>Recipe Calculator</span>
+                </a>
+
+                <span class="nav-section-label">Account</span>
+                <a href="#progress" class="nav-item" data-view="progress" id="nav-progress">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    <span>Progress</span>
+                </a>
+                <a href="#settings" class="nav-item" data-view="settings" id="nav-settings">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    <span>Settings & Targets</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-snippet">
+                    <div class="user-avatar" id="sidebar-user-avatar">D</div>
+                    <div class="user-details">
+                        <div class="user-name" id="sidebar-user-name">Demo Athlete</div>
+                        <div class="user-target" id="sidebar-user-email" style="font-size: 11px; color: var(--text-muted); word-break: break-all;">demo@fitkit.local</div>
+                        <div class="user-target" id="sidebar-user-target" style="font-size: 11px; color: var(--color-primary-dark); font-weight: 500;"></div>
+                    </div>
+                </div>
+                <button class="btn btn-subtle btn-sm" id="btn-sidebar-logout" style="margin-top: 10px; width: 100%; justify-content: center; font-size: 12px; color: var(--text-secondary);" title="Sign out of FitKit">Sign Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="app-content">
+
+            <!-- Mobile Topbar -->
+            <div class="mobile-topbar">
+                <div class="mobile-brand">
+                    <div class="brand-mark">FK</div>
+                    <strong>FitKit</strong>
+                </div>
+                <button class="mobile-nav-toggle" id="mobile-nav-btn" aria-label="Toggle navigation menu">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Top Header Bar with Date Navigation and Add Food CTA -->
+            <header class="content-topbar">
+                <div class="date-navigator">
+                    <button class="date-btn" id="btn-prev-day" aria-label="Previous day">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <span class="date-label is-today" id="current-date-text">Today, Oct 15, 2026</span>
+                    <button class="date-btn" id="btn-next-day" aria-label="Next day">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                    <button class="btn btn-secondary btn-sm" id="btn-jump-today" style="margin-left: 6px;">Today</button>
+                </div>
+
+                <div class="topbar-actions">
+                    <button class="btn btn-primary" id="btn-open-log-modal">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Add food</span>
+                    </button>
+                    <button class="btn btn-subtle btn-sm" id="btn-topbar-logout" style="font-size: 12.5px; margin-left: 6px;" title="Sign out">Sign Out</button>
+                </div>
+            </header>
+
+            <!-- VIEW 1: OVERVIEW & DAILY DASHBOARD -->
+            <section class="page-container view-section active" id="view-overview">
+                <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h2 class="page-title">Daily Overview</h2>
+                        <p class="page-subtitle">Today's calorie balance, macronutrient targets, and meal summary.</p>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="food-tag" id="overview-today-badge" style="font-size: 12px; padding: 6px 14px; background: #FAF8F2; font-weight: 600; color: var(--text-primary); border-radius: var(--radius-full);">
+                            Today • <span id="overview-date-str">--</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Calorie & Macronutrient Summary Cards -->
+                <div class="dashboard-grid">
+                    <!-- Calorie Progress Card -->
+                    <div class="calorie-summary-card">
+                        <div class="card-title-row">
+                            <span class="card-title">Calories</span>
+                            <small class="text-secondary" id="cal-budget-label">Daily Budget</small>
+                        </div>
+
+                        <div class="calorie-metric-row">
+                            <div class="metric-big">
+                                <span class="metric-number" id="cal-remaining-val">--</span>
+                                <span class="metric-sub" id="cal-status-text">Calories remaining</span>
+                            </div>
+                            <div class="metric-split">
+                                <div class="split-item">
+                                    <span>Consumed</span>
+                                    <strong id="cal-consumed-val">0</strong>
+                                </div>
+                                <div class="split-item">
+                                    <span>Target</span>
+                                    <strong id="cal-target-val">--</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-track">
+                                <div class="progress-fill" id="cal-progress-fill" style="width: 0%;"></div>
+                            </div>
+                            <div class="progress-labels">
+                                <span id="cal-pct-text">--</span>
+                                <span id="cal-consumed-ratio">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Macronutrient Targets Card -->
+                    <div class="macro-summary-card">
+                        <div class="card-title-row">
+                            <span class="card-title">Macronutrient Targets</span>
+                            <small class="text-secondary">Grams</small>
+                        </div>
+
+                        <div class="macro-items">
+                            <!-- Protein -->
+                            <div class="macro-item">
+                                <div class="macro-header">
+                                    <span class="macro-name">Protein</span>
+                                    <span class="macro-values"><strong id="macro-protein-consumed">0</strong> / <span id="macro-protein-target">--</span>g</span>
+                                </div>
+                                <div class="macro-bar-track">
+                                    <div class="macro-bar-fill macro-fill-protein" id="macro-bar-protein" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Carbohydrates -->
+                            <div class="macro-item">
+                                <div class="macro-header">
+                                    <span class="macro-name">Carbohydrates</span>
+                                    <span class="macro-values"><strong id="macro-carbs-consumed">0</strong> / <span id="macro-carbs-target">--</span>g</span>
+                                </div>
+                                <div class="macro-bar-track">
+                                    <div class="macro-bar-fill macro-fill-carbs" id="macro-bar-carbs" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Total Fat -->
+                            <div class="macro-item">
+                                <div class="macro-header">
+                                    <span class="macro-name">Total Fat</span>
+                                    <span class="macro-values"><strong id="macro-fat-consumed">0</strong> / <span id="macro-fat-target">--</span>g</span>
+                                </div>
+                                <div class="macro-bar-track">
+                                    <div class="macro-bar-fill macro-fill-fat" id="macro-bar-fat" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Dietary Fiber -->
+                            <div class="macro-item">
+                                <div class="macro-header">
+                                    <span class="macro-name">Dietary Fiber</span>
+                                    <span class="macro-values"><strong id="macro-fiber-consumed">0</strong> / <span id="macro-fiber-target">--</span>g</span>
+                                </div>
+                                <div class="macro-bar-track">
+                                    <div class="macro-bar-fill macro-fill-fiber" id="macro-bar-fiber" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Concise Meals Section -->
+                <div class="card-title-row" style="margin-top: 28px; margin-bottom: 14px;">
+                    <div>
+                        <h3 class="card-title">Today's Meals</h3>
+                        <small class="text-secondary">Summary of logged food for today</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary btn-sm" id="btn-overview-open-diary" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <span>Browse Food Diary</span>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4 Concise Summary Cards for Today's Meals -->
+                <div class="today-summary-grid" id="today-meals-summary-grid">
+                    <!-- Injected dynamically by renderTodayOverview() -->
+                </div>
+
+                <!-- Editorial Science Callout -->
+                <div class="card" style="margin-top: 24px; background-color: #FAF8F2;">
+                    <div class="card-title-row">
+                        <span class="card-title">Nutrition Note: Raw vs. Cooked Tracking</span>
+                        <span class="food-tag">Yield Principle</span>
+                    </div>
+                    <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 8px;">
+                        Grains and legumes absorb 1.5x to 3x their weight in water during boiling. 100g of raw white rice (365 kcal) expands into 280g of cooked rice (130 kcal/100g). If you consume 200g of cooked rice, always select <strong>Rice, white, cooked</strong> (260 kcal) instead of raw grains to prevent inadvertent calorie overestimation.
+                    </p>
+                </div>
+            </section>
+
+            <!-- VIEW 2: FOOD DIARY FULL VIEW (Date Browsing & Management) -->
+            <section class="page-container view-section" id="view-diary">
+                <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+                    <div>
+                        <h2 class="page-title">Food Diary</h2>
+                        <p class="page-subtitle">Browse, review, and manage your daily meal logs by date.</p>
+                    </div>
+                    <button class="btn btn-primary" id="btn-diary-add-food" style="display: inline-flex; align-items: center; gap: 6px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>+ Add Food to Diary</span>
+                    </button>
+                </div>
+
+                <!-- Diary Date Navigation & Day Nutrition Summary Banner -->
+                <div class="diary-date-banner">
+                    <div class="diary-date-controls">
+                        <button class="date-btn" id="diary-prev-day" title="Previous day" aria-label="Previous day">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <div class="diary-date-picker-wrap">
+                            <span class="diary-date-heading" id="diary-current-date-text">Friday, Oct 16, 2026</span>
+                            <span class="diary-date-relative-tag" id="diary-date-relative-tag">Today</span>
+                            <input type="date" id="diary-date-input" class="diary-date-input" title="Choose date" aria-label="Choose date">
+                        </div>
+                        <button class="date-btn" id="diary-next-day" title="Next day" aria-label="Next day">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="diary-jump-today-btn">Jump to Today</button>
+                    </div>
+
+                    <!-- Day Nutrients Summary Pill -->
+                    <div class="diary-day-summary" id="diary-day-summary">
+                        <span id="diary-summary-cals"><strong>0</strong> kcal</span>
+                        <span class="divider">•</span>
+                        <span id="diary-summary-macros">P: 0g • C: 0g • F: 0g</span>
+                    </div>
+                </div>
+
+                <!-- Empty Day State Card (shown when 0 items logged across the day) -->
+                <div id="diary-empty-day" class="empty-diary-card" style="display: none;">
+                    <div class="empty-diary-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <h3 class="empty-diary-title" id="diary-empty-title">No meals logged for this day</h3>
+                    <p class="empty-diary-desc" id="diary-empty-desc">You haven't recorded any meals or foods for this date yet. Choose a meal below to start logging.</p>
+                    <div class="empty-diary-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="window.FitKitApp.openLogModalForMeal('Breakfast', 'diary')">+ Log Breakfast</button>
+                        <button class="btn btn-secondary btn-sm" onclick="window.FitKitApp.openLogModalForMeal('Lunch', 'diary')">+ Log Lunch</button>
+                        <button class="btn btn-secondary btn-sm" onclick="window.FitKitApp.openLogModalForMeal('Dinner', 'diary')">+ Log Dinner</button>
+                        <button class="btn btn-secondary btn-sm" onclick="window.FitKitApp.openLogModalForMeal('Snacks', 'diary')">+ Log Snacks</button>
+                    </div>
+                </div>
+
+                <!-- Detailed Grouped Meals Container -->
+                <div id="diary-meals-container" class="meals-container">
+                    <!-- Populated dynamically: Breakfast, Lunch, Dinner, Snacks with full rows & actions -->
+                </div>
+            </section>
+
+            <!-- VIEW 3: FOOD LIBRARY & PORTIONS -->
+            <section class="page-container view-section" id="view-library">
+                <div class="page-header">
+                    <div>
+                        <h2 class="page-title">Food Library</h2>
+                        <p class="page-subtitle">Verified food compositions from IFCT 2017, USDA, and Open Food Facts with documented household measures.</p>
+                    </div>
+                </div>
+
+                <!-- Search and Filters -->
+                <div class="search-bar-wrap">
+                    <div class="search-input-box">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="lib-search-input" class="search-input" placeholder="Search by food name, Hindi/regional name, or brand...">
+                    </div>
+
+                    <div class="filter-controls">
+                        <button class="filter-btn active" data-state="ALL" id="lib-pill-all">All States</button>
+                        <button class="filter-btn" data-state="RAW_INGREDIENT">Raw Ingredients</button>
+                        <button class="filter-btn" data-state="COOKED_SINGLE">Cooked</button>
+                        <button class="filter-btn" data-state="PREPARED_RECIPE">Prepared Recipes</button>
+                        <button class="filter-btn" data-state="PACKAGED_COMMERCIAL">Branded</button>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                        <select id="lib-group-select" class="filter-select" aria-label="Filter by category">
+                            <option value="ALL">All Categories</option>
+                        </select>
+
+                        <select id="lib-quality-select" class="filter-select" aria-label="Filter by data quality status">
+                            <option value="ALL">All Data Qualities</option>
+                            <option value="SOURCE_VERIFIED">Source Verified</option>
+                            <option value="CORRECTED_ANOMALY">Audit Corrected</option>
+                            <option value="CALCULATED_ESTIMATE">Calculated</option>
+                            <option value="UNVERIFIED">Needs Verification</option>
+                        </select>
+
+                        <select id="lib-sort-select" class="filter-select" aria-label="Sort food results">
+                            <option value="RELEVANCE">Relevance</option>
+                            <option value="NAME_ASC">Name (A–Z)</option>
+                            <option value="NAME_DESC">Name (Z–A)</option>
+                            <option value="CALORIES_DESC">Calories (High–Low)</option>
+                            <option value="CALORIES_ASC">Calories (Low–High)</option>
+                        </select>
+
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-clear-lib-filters" style="font-size: 12px; padding: 6px 12px;" title="Reset all search filters">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Food Library Table -->
+                <div class="library-table-container">
+                    <table class="library-table">
+                        <thead>
+                            <tr>
+                                <th>Food Item</th>
+                                <th>State</th>
+                                <th>Category</th>
+                                <th>Energy (100g)</th>
+                                <th>Protein</th>
+                                <th>Carbs</th>
+                                <th>Fat</th>
+                                <th>Portions</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="library-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- VIEW 4: RECIPE & YIELD LAB -->
+            <section class="page-container view-section" id="view-recipes">
+                <div class="page-header">
+                    <div>
+                        <h2 class="page-title">Recipe Calculator & Kitchen Lab</h2>
+                        <p class="page-subtitle">Calculate accurate calories and macros for home-cooked meals by accounting for water weight gain, moisture loss, and custom ingredients.</p>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button class="btn btn-primary btn-sm" id="btn-open-create-recipe" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>New Recipe</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recipe Mode Switcher -->
+                <div style="display: flex; gap: 8px; margin-bottom: 20px; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+                    <button class="filter-btn active" id="tab-btn-curated" data-mode="curated">Classic Recipes</button>
+                    <button class="filter-btn" id="tab-btn-custom" data-mode="custom">
+                        My Saved Recipes
+                        <span id="custom-recipes-badge" style="background: var(--highlight-sand); padding: 1px 7px; border-radius: 10px; font-size: 11px; margin-left: 4px; font-weight: 600;">0</span>
+                    </button>
+                </div>
+
+                <!-- SECTION A: CURATED CATALOG PRESETS -->
+                <div id="section-curated-recipes">
+                    <!-- Recipe Presets Bar -->
+                    <div class="recipe-selector-bar" id="recipe-tabs-container">
+                        <!-- Populated dynamically -->
+                    </div>
+
+                    <div class="recipe-grid">
+                        <!-- Formulation & Adjustments Column -->
+                        <div class="card">
+                            <div class="card-title-row">
+                                <h3 class="card-title" id="active-recipe-title">Traditional Whole Wheat Chapati</h3>
+                                <span class="food-tag" id="active-recipe-method">ROASTING_TAWA</span>
+                            </div>
+
+                            <p id="active-recipe-notes" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 18px;">
+                                Kneaded with water, rolled thin, dry roasted on hot tawa until puffed. No added oil.
+                            </p>
+
+                            <div class="range-control-row">
+                                <div class="range-label-row">
+                                    <label for="lab-slider-yield">Cooked Weight Change (Cooked vs Raw)</label>
+                                    <span id="lab-yield-val" style="color: var(--accent-primary);">1.32x</span>
+                                </div>
+                                <input type="range" id="lab-slider-yield" class="range-input" min="0.5" max="3.5" step="0.05" value="1.32">
+                                <small class="text-secondary" style="display:block; margin-top:4px;">Grains and lentils absorb water and get heavier (1.5x–2.5x). Breads and roasted foods lose moisture and get lighter (0.7x–0.9x).</small>
+                            </div>
+
+                            <div class="range-control-row">
+                                <div class="range-label-row">
+                                    <label for="lab-slider-servings">Number of Servings</label>
+                                    <span id="lab-servings-val" style="color: var(--accent-primary);">4 servings</span>
+                                </div>
+                                <input type="range" id="lab-slider-servings" class="range-input" min="1" max="10" step="1" value="4">
+                            </div>
+
+                            <h4 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin: 20px 0 10px;">Recipe Ingredients</h4>
+                            <div class="library-table-container">
+                                <table class="library-table" style="font-size: 12.5px;">
+                                    <thead>
+                                        <tr>
+                                            <th>Ingredient</th>
+                                            <th>Raw Weight</th>
+                                            <th>Nutrient Retention</th>
+                                            <th>Calories</th>
+                                            <th>Protein</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recipe-ingredients-table-body">
+                                        <!-- Injected dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Computed Outcomes Column -->
+                        <div class="card">
+                            <div class="card-title-row">
+                                <h3 class="card-title">Cooked Dish Nutrition</h3>
+                                <span class="food-tag">Live Estimate</span>
+                            </div>
+
+                            <div class="calc-result-box">
+                                <div class="calc-row-split">
+                                    <span class="text-secondary">Total Raw Ingredients:</span>
+                                    <strong id="res-raw-weight">-- g</strong>
+                                </div>
+                                <div class="calc-row-split">
+                                    <span class="text-secondary">Final Cooked Dish:</span>
+                                    <strong id="res-cooked-weight" style="color: var(--accent-primary);">-- g</strong>
+                                </div>
+                                <div class="calc-row-split">
+                                    <span class="text-secondary">Single Serving Size:</span>
+                                    <strong id="res-serving-weight">-- g</strong>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px;">
+                                <div style="background-color: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
+                                    <small style="display:block; color: var(--text-muted); text-transform:uppercase;">Per 100g of Dish</small>
+                                    <div style="font-size: 24px; font-family: var(--font-serif); font-weight: 500; color: var(--text-primary); margin: 4px 0;" id="res-per100-kcal">--</div>
+                                    <small style="color: var(--text-secondary);" id="res-per100-macros">P: -- | C: -- | F: --</small>
+                                </div>
+                                <div style="background-color: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
+                                    <small style="display:block; color: var(--text-muted); text-transform:uppercase;">Per Serving (1 portion)</small>
+                                    <div style="font-size: 24px; font-family: var(--font-serif); font-weight: 500; color: var(--accent-primary); margin: 4px 0;" id="res-serving-kcal">--</div>
+                                    <small style="color: var(--text-secondary);" id="res-serving-macros">P: -- | C: -- | F: --</small>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-secondary" style="width: 100%;" id="btn-log-calculated-recipe">
+                                + Log 1 Serving to Today's Diary
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION B: USER CUSTOM RECIPES -->
+                <div id="section-custom-recipes" style="display: none;">
+                    <div id="custom-recipes-list-container">
+                        <!-- Populated dynamically: empty state or recipe cards -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 5: PROGRESS & TRENDS -->
+            <section class="page-container view-section" id="view-progress">
+                <div class="page-header">
+                    <div>
+                        <h2 class="page-title">Progress & Nutrition Trends</h2>
+                        <p class="page-subtitle">Review your weekly intake history, adherence, and average macronutrient distribution.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title-row">
+                        <span class="card-title">Recent 7-Day Calorie History</span>
+                        <small class="text-secondary">Daily Budget Target: <span id="progress-target-ref">--</span> kcal</small>
+                    </div>
+
+                    <div class="weekly-trend-chart" id="trend-bars-container">
+                        <!-- Injected dynamically -->
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); padding-top: 8px;">
+                        <span>Average Daily: <strong id="trend-avg-cal" style="color: var(--text-primary);">-- kcal</strong></span>
+                        <span>Logged Days: <strong id="trend-logged-days" style="color: var(--text-primary);">--</strong></span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title-row">
+                        <span class="card-title">Macro Energy Ratio</span>
+                        <small class="text-secondary">Percent of total caloric energy</small>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; text-align: center;">
+                        <div style="background-color: #FAF8F2; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                            <span style="display:block; font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Protein</span>
+                            <strong style="font-size: 20px; font-family: var(--font-serif); color: var(--accent-primary);" id="macro-pct-protein">--%</strong>
+                        </div>
+                        <div style="background-color: #FAF8F2; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                            <span style="display:block; font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Carbohydrates</span>
+                            <strong style="font-size: 20px; font-family: var(--font-serif); color: #8C7B6B;" id="macro-pct-carbs">--%</strong>
+                        </div>
+                        <div style="background-color: #FAF8F2; padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                            <span style="display:block; font-size: 11px; text-transform: uppercase; color: var(--text-muted);">Total Fat</span>
+                            <strong style="font-size: 20px; font-family: var(--font-serif); color: var(--accent-secondary);" id="macro-pct-fat">--%</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 6: SETTINGS & TARGETS -->
+            <section class="page-container view-section" id="view-settings">
+                <div class="page-header">
+                    <div>
+                        <h2 class="page-title">Settings & Daily Targets</h2>
+                        <p class="page-subtitle">Configure your personal calorie budget and macronutrient distribution goals.</p>
+                    </div>
+                </div>
+
+                <div class="card" style="max-width: 600px;">
+                    <form id="targets-form">
+                        <div class="form-group">
+                            <label class="form-label" for="setting-cal-target">Daily Calorie Target (kcal)</label>
+                            <input type="number" id="setting-cal-target" class="form-input" min="1200" max="5000" step="50" required>
+                            <span class="form-hint">Used to calculate remaining calories throughout your daily journal.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="setting-protein-target">Protein Target (grams)</label>
+                            <input type="number" id="setting-protein-target" class="form-input" min="20" max="350" step="5" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="setting-carbs-target">Carbohydrates Target (grams)</label>
+                            <input type="number" id="setting-carbs-target" class="form-input" min="30" max="600" step="5" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="setting-fat-target">Total Fat Target (grams)</label>
+                            <input type="number" id="setting-fat-target" class="form-input" min="15" max="200" step="5" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="setting-fiber-target">Dietary Fiber Target (grams)</label>
+                            <input type="number" id="setting-fiber-target" class="form-input" min="10" max="80" step="1" required>
+                        </div>
+
+                        <div style="margin-top: 24px; display: flex; gap: 10px;">
+                            <button type="submit" class="btn btn-primary">Save Targets</button>
+                            <button type="button" class="btn btn-secondary" id="btn-reset-targets">Reset to Recommended</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL: ADD FOOD TO MEAL -->
+    <div class="modal-overlay" id="modal-log-food" role="dialog" aria-modal="true" aria-labelledby="log-modal-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title" id="log-modal-title">Log Food to Diary</h3>
+                <button class="modal-close-btn" id="btn-close-log-modal" aria-label="Close dialog">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Meal Picker -->
+                <div class="form-group">
+                    <label class="form-label" for="modal-meal-select">Select Meal</label>
+                    <select id="modal-meal-select" class="form-select">
+                        <option value="Breakfast">Breakfast</option>
+                        <option value="Lunch">Lunch</option>
+                        <option value="Dinner">Dinner</option>
+                        <option value="Snacks">Snacks</option>
+                    </select>
+                </div>
+
+                <!-- Food Search Input -->
+                <div class="form-group">
+                    <label class="form-label" for="modal-food-search">Search Food Item</label>
+                    <input type="text" id="modal-food-search" class="form-input" placeholder="Type to search (e.g. Chapati, Cooked Rice, Dal, Ghee)..." autocomplete="off">
+                </div>
+
+                <!-- Food Quick Select Dropdown/Results List -->
+                <div id="modal-search-results" style="max-height: 180px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); margin-bottom: 16px; display: none;">
+                    <!-- Injected dynamically -->
+                </div>
+
+                <!-- Selected Food Details & Portion Form -->
+                <div id="modal-selected-food-details" style="display: none;">
+                    <div style="background-color: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
+                        <strong id="modal-sel-name" style="font-size: 14px; color: var(--text-primary); display: block;">Food Name</strong>
+                        <span id="modal-sel-state" class="food-tag" style="margin-top: 4px; display: inline-block;">RAW_INGREDIENT</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label class="form-label" for="modal-portion-select">Serving Portion</label>
+                            <select id="modal-portion-select" class="form-select">
+                                <option value="100">Standard 100g</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="modal-qty-input">Quantity</label>
+                            <input type="number" id="modal-qty-input" class="form-input" min="0.1" max="50" step="0.5" value="1.0">
+                        </div>
+                    </div>
+
+                    <!-- Computed Nutrition Preview -->
+                    <div class="logging-preview-box">
+                        <div class="preview-calorie-line">
+                            <span class="text-secondary">Calculated Energy:</span>
+                            <strong id="modal-preview-kcal">0 kcal</strong>
+                        </div>
+                        <div class="preview-macros-grid">
+                            <div>Protein<strong id="modal-preview-p">0g</strong></div>
+                            <div>Carbs<strong id="modal-preview-c">0g</strong></div>
+                            <div>Fat<strong id="modal-preview-f">0g</strong></div>
+                            <div>Fiber<strong id="modal-preview-fib">0g</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-subtle" id="btn-cancel-log">Cancel</button>
+                <button class="btn btn-primary" id="btn-confirm-log" disabled>Add to Diary</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT MEAL ENTRY -->
+    <div class="modal-overlay" id="modal-edit-entry" role="dialog" aria-modal="true" aria-labelledby="modal-edit-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title" id="modal-edit-title">Edit Entry</h3>
+                    <p class="modal-subtitle">Update serving portion or quantity multiplier.</p>
+                </div>
+                <button class="modal-close-btn" id="btn-close-edit-modal" aria-label="Close dialog">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <input type="hidden" id="edit-entry-id">
+                <div style="background-color: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px;">
+                    <strong id="modal-edit-name" style="font-size: 14px; color: var(--text-primary); display: block;">Food Name</strong>
+                    <span id="modal-edit-meal" class="food-tag" style="margin-top: 4px; display: inline-block;">Breakfast</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                        <label class="form-label" for="modal-edit-portion-desc">Portion Description</label>
+                        <input type="text" id="modal-edit-portion-desc" class="form-input" placeholder="e.g. 1 medium piece (35g)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="modal-edit-qty-input">Quantity Multiplier</label>
+                        <input type="number" id="modal-edit-qty-input" class="form-input" min="0.1" max="50" step="0.5" value="1.0">
+                    </div>
+                </div>
+
+                <!-- Live recalculation preview -->
+                <div class="logging-preview-box">
+                    <div class="preview-calorie-line">
+                        <span class="text-secondary">Updated Energy:</span>
+                        <strong id="modal-edit-preview-kcal">0 kcal</strong>
+                    </div>
+                    <div class="preview-macros-grid">
+                        <div>Protein<strong id="modal-edit-preview-p">0g</strong></div>
+                        <div>Carbs<strong id="modal-edit-preview-c">0g</strong></div>
+                        <div>Fat<strong id="modal-edit-preview-f">0g</strong></div>
+                        <div>Fiber<strong id="modal-edit-preview-fib">0g</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-subtle" id="btn-cancel-edit">Cancel</button>
+                <button class="btn btn-primary" id="btn-confirm-edit">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: FOOD COMPOSITION & CITATION DETAILS -->
+    <div class="modal-overlay" id="modal-food-info" role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <span class="food-tag" id="info-modal-code">IFCT_A001</span>
+                    <h3 class="modal-title" id="info-modal-title" style="margin-top: 4px;">Food Details</h3>
+                </div>
+                <button class="modal-close-btn" id="btn-close-info-modal" aria-label="Close dialog">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <span class="food-tag" id="info-modal-state">RAW_INGREDIENT</span>
+                    <span class="food-tag" id="info-modal-group">Cereals and Millets</span>
+                    <span class="food-tag" id="info-modal-quality">SOURCE_VERIFIED</span>
+                </div>
+
+                <div style="background-color: var(--bg-primary); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px; display: flex; justify-content: space-around; text-align: center;">
+                    <div>
+                        <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display:block;">Energy (kcal)</span>
+                        <strong style="font-size: 24px; font-family: var(--font-serif); color: var(--accent-primary);" id="info-modal-kcal">--</strong>
+                        <small class="text-secondary">per 100g</small>
+                    </div>
+                    <div style="border-left: 1px solid var(--border-subtle);"></div>
+                    <div>
+                        <span style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); display:block;">Energy (kJ)</span>
+                        <strong style="font-size: 24px; font-family: var(--font-serif); color: var(--text-primary);" id="info-modal-kj">--</strong>
+                        <small class="text-secondary">per 100g</small>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 10px;">Proximate Composition (Per 100g)</h4>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; font-size: 12.5px;">
+                    <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 12px; background: #FFFDF8;">Protein: <strong id="info-modal-p">--</strong>g</div>
+                    <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 12px; background: #FFFDF8;">Carbs: <strong id="info-modal-c">--</strong>g</div>
+                    <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 12px; background: #FFFDF8;">Fat: <strong id="info-modal-f">--</strong>g</div>
+                    <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 12px; background: #FFFDF8;">Fiber: <strong id="info-modal-fib">--</strong>g</div>
+                    <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 12px; background: #FFFDF8;">Water: <strong id="info-modal-water">--</strong>g</div>
+                    <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 12px; background: #FFFDF8;">Ash: <strong id="info-modal-ash">--</strong>g</div>
+                </div>
+
+                <h4 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 10px;">Documented Household Portions</h4>
+                <div id="info-modal-portions" style="font-size: 13px; margin-bottom: 16px;">
+                    <!-- Injected dynamically -->
+                </div>
+
+                <div style="background-color: var(--highlight-sand); border: 1px solid #DFD7CA; border-radius: var(--radius-sm); padding: 12px; font-size: 12px;">
+                    <strong>Source & Citation:</strong>
+                    <div id="info-modal-citation" style="margin-top: 3px; color: var(--text-secondary);">--</div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-dismiss-info">Close</button>
+                <button class="btn btn-primary" id="btn-log-from-info">+ Log to Diary</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE / EDIT CUSTOM RECIPE -->
+    <div class="modal-overlay" id="modal-custom-recipe" role="dialog" aria-modal="true" aria-labelledby="modal-custom-recipe-title">
+        <div class="modal-card" style="max-width: 760px; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title" id="modal-custom-recipe-title">Create Custom Recipe</h3>
+                    <p class="modal-subtitle">Add your ingredients and cooked weight to calculate exact calories and macros per serving.</p>
+                </div>
+                <button class="modal-close-btn" id="btn-close-custom-recipe" aria-label="Close dialog">&times;</button>
+            </div>
+
+            <div class="modal-body" style="overflow-y: auto; padding: 20px;">
+                <input type="hidden" id="custom-recipe-edit-id">
+
+                <!-- Recipe Name & Details -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px;">
+                    <div class="form-group">
+                        <label class="form-label" for="custom-recipe-title">Recipe Title *</label>
+                        <input type="text" id="custom-recipe-title" class="form-input" placeholder="e.g. Homemade Vegetable Upma" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="custom-recipe-cuisine">Category / Cuisine</label>
+                        <input type="text" id="custom-recipe-cuisine" class="form-input" placeholder="e.g. South Indian, Home Recipe">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 16px;">
+                    <div class="form-group">
+                        <label class="form-label" for="custom-recipe-desc">Description / Notes</label>
+                        <input type="text" id="custom-recipe-desc" class="form-input" placeholder="e.g. Roasted suji with mustard tadka, onions, and boiled water">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="custom-recipe-method">Cooking Method</label>
+                        <select id="custom-recipe-method" class="form-select">
+                            <option value="SAUTEING_STIRFRY">Sautéing / Tadka</option>
+                            <option value="BOILING_SIMMERING">Boiling & Simmering</option>
+                            <option value="PRESSURE_COOKING" selected>Pressure Cooking</option>
+                            <option value="ROASTING_TAWA">Roasting / Tawa</option>
+                            <option value="STEAMING">Steaming</option>
+                            <option value="BAKING">Baking</option>
+                            <option value="DEEP_FRYING">Deep Frying</option>
+                            <option value="RAW_BLENDING">Raw / Blended</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Ingredients Formulation Builder -->
+                <div style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted);">
+                            Ingredients List
+                        </span>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-add-ingredient-row" style="font-size: 12px; padding: 4px 10px;">
+                            + Add Ingredient
+                        </button>
+                    </div>
+
+                    <div class="library-table-container" style="max-height: 220px; overflow-y: auto;">
+                        <table class="library-table" style="font-size: 12.5px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 48%;">Ingredient</th>
+                                    <th style="width: 24%;">Raw Weight (g)</th>
+                                    <th style="width: 18%;">Nutrient Retention</th>
+                                    <th style="width: 10%; text-align: center;">Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody id="custom-ingredients-tbody">
+                                <!-- Dynamic rows inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <small class="text-secondary" style="display:block; margin-top: 4px;">
+                        Tip: Choose foods from your library. Enter raw weights in grams (g). Retention is 1.0 (100%) by default.
+                    </small>
+                </div>
+
+                <!-- Cooked Yield & Servings Controls -->
+                <div style="background: #FAF8F2; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 16px;">
+                    <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">
+                        Cooked Weight & Servings
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label class="form-label" for="custom-recipe-cooked-weight" style="font-size: 12px;">
+                                Final Cooked Weight (g)
+                            </label>
+                            <input type="number" id="custom-recipe-cooked-weight" class="form-input" min="1" step="1" placeholder="e.g. 500 (Scale weight)">
+                            <small class="text-secondary" style="font-size: 11px;">Weigh your finished dish on a kitchen scale for best accuracy.</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="custom-recipe-yield-factor" style="font-size: 12px;">
+                                Estimated Weight Multiplier
+                            </label>
+                            <input type="number" id="custom-recipe-yield-factor" class="form-input" min="0.1" max="5.0" step="0.05" value="1.0">
+                            <small class="text-secondary" style="font-size: 11px;">Used only if final cooked weight above is left blank.</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="custom-recipe-servings" style="font-size: 12px;">
+                                Number of Servings *
+                            </label>
+                            <input type="number" id="custom-recipe-servings" class="form-input" min="1" max="24" step="0.5" value="2.0" required>
+                            <small class="text-secondary" style="font-size: 11px;">How many portions or people this recipe serves.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Nutrition Preview Output -->
+                <div id="custom-recipe-preview-section" style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 14px; background: var(--bg-surface);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-muted);">
+                            Recipe Nutrition Preview
+                        </span>
+                        <button type="button" class="btn btn-subtle btn-sm" id="btn-calc-custom-preview" style="font-size: 11.5px; padding: 2px 8px;">
+                            Refresh Preview
+                        </button>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px;">
+                        <div style="background: var(--bg-primary); padding: 10px; border-radius: var(--radius-sm); text-align: center;">
+                            <small style="color: var(--text-muted); display: block; text-transform: uppercase; font-size: 10.5px;">Entire Cooked Dish</small>
+                            <strong id="preview-batch-kcal" style="font-size: 18px; font-family: var(--font-serif); color: var(--text-primary); display: block;">-- kcal</strong>
+                            <small id="preview-batch-macros" style="color: var(--text-secondary); font-size: 11px;">P: -- | C: -- | F: --</small>
+                            <small id="preview-batch-weight" style="color: var(--text-muted); font-size: 10.5px; display: block; margin-top: 2px;">Weight: --g</small>
+                        </div>
+                        <div style="background: var(--bg-primary); padding: 10px; border-radius: var(--radius-sm); text-align: center;">
+                            <small style="color: var(--text-muted); display: block; text-transform: uppercase; font-size: 10.5px;">Per 100g of Dish</small>
+                            <strong id="preview-per100-kcal" style="font-size: 18px; font-family: var(--font-serif); color: var(--text-primary); display: block;">-- kcal</strong>
+                            <small id="preview-per100-macros" style="color: var(--text-secondary); font-size: 11px;">P: -- | C: -- | F: --</small>
+                        </div>
+                        <div style="background: var(--bg-primary); padding: 10px; border-radius: var(--radius-sm); text-align: center; border: 1px solid #E8DFD3;">
+                            <small style="color: var(--accent-primary); display: block; text-transform: uppercase; font-size: 10.5px; font-weight: 600;">Per Serving (1 portion)</small>
+                            <strong id="preview-serving-kcal" style="font-size: 18px; font-family: var(--font-serif); color: var(--accent-primary); display: block;">-- kcal</strong>
+                            <small id="preview-serving-macros" style="color: var(--text-secondary); font-size: 11px;">P: -- | C: -- | F: --</small>
+                            <small id="preview-serving-weight" style="color: var(--text-muted); font-size: 10.5px; display: block; margin-top: 2px;">Portion: --g</small>
+                        </div>
+                    </div>
+
+                    <div id="preview-incomplete-warning" style="display: none; background: #FFF4E5; border: 1px solid #F5D3A6; border-radius: 4px; padding: 6px 10px; font-size: 11.5px; color: #8C5311; margin-top: 6px;">
+                        Notice: One or more selected ingredients contain partial nutrient values in the food catalog.
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="padding: 14px 20px;">
+                <button class="btn btn-subtle" id="btn-cancel-custom-recipe">Cancel</button>
+                <button class="btn btn-primary" id="btn-save-custom-recipe">Save Recipe</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notice -->
+    <div class="toast-notice" id="toast-notice">Notice</div>
+
+    <!-- Application JavaScript Logic -->
+    <script src="/js/app.js"></script>
+</body>
+</html>
